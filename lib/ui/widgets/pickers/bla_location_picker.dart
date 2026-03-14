@@ -1,4 +1,4 @@
-import 'package:week8_promise/services/location_service.dart';
+import 'package:week8_promise/main_common.dart';
 import 'package:week8_promise/ui/widgets/display/bla_divider.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +19,7 @@ class BlaLocationPicker extends StatefulWidget {
 
 class _BlaLocationPickerState extends State<BlaLocationPicker> {
   String currentSearchText = "";
+  List<Location> _allLocations = [];
 
   void onTap(Location location) {
     Navigator.pop<Location>(context, location);
@@ -31,6 +32,13 @@ class _BlaLocationPickerState extends State<BlaLocationPicker> {
   @override
   void initState() {
     super.initState();
+
+    // Load all locations from the repository
+    locationRepository.getLocations().then((locations) {
+      setState(() {
+        _allLocations = locations;
+      });
+    });
 
     // Initilize the search bar if any initial location
     if (widget.initLocation != null) {
@@ -50,7 +58,7 @@ class _BlaLocationPickerState extends State<BlaLocationPicker> {
     if (currentSearchText.length < 2) {
       return [];
     }
-    return LocationsService.availableLocations
+    return _allLocations
         .where(
           (location) => location.name.toUpperCase().contains(
             currentSearchText.toUpperCase(),

@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
+import 'data/repositories/location/location_repository.dart';
 import 'ui/screens/home/home_screen.dart';
 import 'ui/theme/theme.dart';
 
-void mainCommon() {
+// Global repository instance accessible throughout the app
+late LocationRepository locationRepository;
+
+void mainCommon({required LocationRepository locationRepo}) {
+  locationRepository = locationRepo;
   runApp(const BlaBlaApp());
 }
 

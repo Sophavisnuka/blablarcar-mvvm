@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:week8_promise/ui/states/ride_prefs_state.dart';
 import '../../../model/ride/ride.dart';
 import '../../../model/ride_pref/ride_pref.dart';
-import '../../../services/ride_prefs_service.dart';
 import '../../../services/rides_service.dart';
 import '../../../utils/animations_util.dart' show AnimationUtils;
 import '../../theme/theme.dart';
@@ -36,7 +37,7 @@ class _RidesSelectionScreenState extends State<RidesSelectionScreen> {
   }
 
   RidePreference get selectedRidePreference =>
-      RidePrefsService.selectedPreference!; // not null at this state
+    context.read<RidePrefsState>().currentPref!;
 
   List<Ride> get matchingRides =>
       RidesService.getRidesFor(selectedRidePreference);
@@ -51,16 +52,16 @@ class _RidesSelectionScreenState extends State<RidesSelectionScreen> {
         );
 
     if (newPreference != null) {
-      // 2 - Ask the service to update the current preference
-      RidePrefsService.selectPreference(newPreference);
-
-      // 3 -   Update the widget state  - TODO Improve this with proper state managagement
-      setState(() {});
+       // 2 - Update global state via provider (no setState needed!)
+      await context.read<RidePrefsState>().setPreference(newPreference);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<RidePrefsState>();
+    final currentPref = state.currentPref!;
+    final rides = RidesService.getRidesFor(currentPref);
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.only(
@@ -78,10 +79,10 @@ class _RidesSelectionScreenState extends State<RidesSelectionScreen> {
         
             Expanded(
               child: ListView.builder(
-                itemCount: matchingRides.length,
+                itemCount: rides.length,
                 itemBuilder: (ctx, index) => RideSelectionTile(
-                  ride: matchingRides[index],
-                  onPressed: () => onRideSelected(matchingRides[index]),
+                  ride: rides[index],
+                  onPressed: () => onRideSelected(rides[index]),
                 ),
               ),
             ),

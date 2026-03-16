@@ -1,6 +1,7 @@
+import 'package:provider/provider.dart';
 import 'package:week8_promise/model/ride_pref/ride_pref.dart';
-import 'package:week8_promise/services/ride_prefs_service.dart';
 import 'package:flutter/material.dart';
+import 'package:week8_promise/ui/states/ride_prefs_state.dart';
 import '../../../utils/animations_util.dart';
 import '../../theme/theme.dart';
 import '../../widgets/pickers/bla_ride_preference_picker.dart';
@@ -24,15 +25,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   void onRidePrefSelected(RidePreference selectedPreference) async {
     // 1- Ask the service to update the current preference
-    RidePrefsService.selectPreference(selectedPreference);
+    await context.read<RidePrefsState>().setPreference(selectedPreference);
 
     // 2 - Navigate to the rides screen
-    await Navigator.of(
-      context,
-    ).push(AnimationUtils.createBottomToTopRoute(RidesSelectionScreen()));
-
-    // 3 - After wait  - Update the state   - TODO Improve this with proper state managagement
-    setState(() {});
+    await Navigator.of(context).push(
+      AnimationUtils.createBottomToTopRoute(RidesSelectionScreen())
+    );
   }
 
   @override
@@ -41,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildForeground() {
+    final state = context.watch<RidePrefsState>();
     return Column(
       children: [
         // 1 - THE HEADER
@@ -66,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // 2 - THE FORM
               BlaRidePreferencePicker(
-                initRidePreference: RidePrefsService.selectedPreference,
+                initRidePreference: state.currentPref,
                 onRidePreferenceSelected: onRidePrefSelected,
               ),
               SizedBox(height: BlaSpacings.m),
@@ -81,8 +80,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHistory() {
+    final state = context.watch<RidePrefsState>();
     // Reverse the history of preferences
-    List<RidePreference> history = RidePrefsService.preferenceHistory.reversed
+    List<RidePreference> history = state.preferenceHistory.reversed
         .toList();
     return SizedBox(
       height: 200, // Set a fixed height
